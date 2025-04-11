@@ -3,7 +3,7 @@ from utils.helpers import interpolate_time
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from os import listdir
+from os import path as os_path, listdir, makedirs # Added makedirs just in case
 import torch
 import os
 import warnings
@@ -50,34 +50,52 @@ all_labels_eff_list = []
 all_labels_ras_list = []
 feature_folder_map = [] # Keep track of which folder each feature belongs to
 processed_folder_indices = [] # Keep track of folders we actually found data for
+magnifications_to_process = ["10x", "40x"] # Define which magnifications to use
 
 folder_idx_counter = 0 
-for folder in all_image_folders:
+for folder_name in all_image_folders:
     # Path to embeddings for this folder
-    path_to_embeddings_folder = f"{path_to_embeddings}/{folder}/basin5/10x"
-    
-    if not os.path.exists(path_to_embeddings_folder) or not listdir(path_to_embeddings_folder):
-        print(f"Warning: Embeddings path not found for folder {folder}, skipping.")
-        folder_idx_counter += 1 # Still increment error index if skipping folder
-        continue
+    base_embeddings_path = f"{path_to_embeddings}/{folder_name}/basin5"
+    images_processed_this_folder = 0 # Counter for images successfully loaded from this folder (across mags)
 
-    images_list_embeddings = listdir(path_to_embeddings_folder)
-    images_in_folder_count = 0
+    for mag in magnifications_to_process:
+        path_to_embeddings_folder = f"{base_embeddings_path}/{mag}"
 
-    for image_file in images_list_embeddings:
-        try:
-            img_path = f"{path_to_embeddings_folder}/{image_file}"
-            img = torch.load(img_path).cpu().numpy()
-            all_features_list.append(img)
-            # Assign labels corresponding to this FOLDER 
-            all_labels_eff_list.append(TSS_eff_error[folder_idx_counter])
-            all_labels_ras_list.append(TSS_ras_error[folder_idx_counter])
-            feature_folder_map.append(len(processed_folder_indices)) # Store the folder index for this feature
-            images_in_folder_count += 1
-        except Exception as e:
-            print(f"Error loading or processing {img_path}: {e}")
-    
-    if images_in_folder_count > 0:
+        # Check if the specific magnification folder exists and has files
+        if not os_path.exists(path_to_embeddings_folder):
+            # Don't skip the whole folder yet, maybe the other magnification exists
+            print(f"Info: Embeddings path not found for folder {folder_name}, magnification {mag}. Skipping this mag.")
+            continue
+        if not listdir(path_to_embeddings_folder):
+            print(f"Info: Embeddings path empty for folder {folder_name}, magnification {mag}. Skipping this mag.")
+            continue
+
+        # Process images within this magnification folder
+        images_list_embeddings = listdir(path_to_embeddings_folder)
+        for image_file in images_list_embeddings:
+            try:
+                img_path = os_path.join(path_to_embeddings_folder, image_file)
+                embedding = torch.load(img_path).cpu().numpy() # Load embedding
+
+                # --- Feature Aggregation / Flattening ---
+                # Example: Flatten the embedding (C, H, W) -> (C*H*W,)
+                all_features_list.append(embedding)
+
+                # --- Assign labels corresponding to the PARENT FOLDER ---
+                # Both 10x and 40x images from the same 'folder_name' get the same label
+                all_labels_eff_list.append(TSS_eff_error[folder_idx_counter])
+                all_labels_ras_list.append(TSS_ras_error[folder_idx_counter])
+
+                # Map this feature vector back to the index in the 'processed_folder_indices' list
+                # This index represents the time step / folder group for splitting later
+                feature_folder_map.append(len(processed_folder_indices))
+
+                images_processed_this_folder += 1 # Increment count for this folder
+
+            except Exception as e:
+                print(f"Error loading or processing {img_path}: {e}")
+
+    if images_processed_this_folder > 0:
         processed_folder_indices.append(folder_idx_counter) # Add original index if processed
 
     folder_idx_counter += 1 # Move to the next folder's error value
