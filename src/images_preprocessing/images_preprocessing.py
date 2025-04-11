@@ -26,7 +26,7 @@ def preprocess_images(all_images, size, method=None, flatten=False, show_example
         img = img.resize(size).convert('L')  # resize and greyscale
 
         if method == 'edges':
-            preprocessed_img = feature.canny(np.array(img), sigma=0.8)
+            preprocessed_img = feature.canny(np.array(img), sigma=0.2)
 
         elif method == 'normalized':
             transform = transforms.Compose([transforms.ToTensor()])

@@ -1,3 +1,4 @@
 data/
 results/
-virtualenv/
+best_model.h5
+setup.py

@@ -1,9 +1,0 @@
-Notes on changes in batch curves:  
--all basin 3 measurements were deleted   
--2023-10-23: data is deleted since only one datapoint is available  
--2023-11-02: probably wrong TSS measurements so lab measurements of day before are taken  
--2023-11-06: RAS TSS was wrong so lab measurements of day before are taken  
--2024-03-27: no lab measurements of TSS were taken (GJ quit), so sensordata was used   
--2024-07-03 -> images were taken on 2024-07-04 but date is changed to 2024-07-03 because settling test were done on 2024-07-03
--2024-07-24 -> images were taken on 2024-07-26 but date is changed to 2024-07-24 because settling test were done on 2024-07-24
--2024-05-01: deleted, no parameters can be estimated (batch curves not good at all)
