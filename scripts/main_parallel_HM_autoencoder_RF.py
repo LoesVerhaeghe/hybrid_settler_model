@@ -132,6 +132,23 @@ y_train_ras = TSSras_labels[train_indices]
 y_test_ras = TSSras_labels[test_indices]
 
 
+
+# --- Feature processing with PCA (Fit on Train, Transform Train/Test) ---
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+
+scaler = StandardScaler()
+scaler.fit(X_train)
+X_train_scaled = scaler.transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+all_features_agg_scaled = scaler.transform(all_features_agg)
+
+pca = PCA(n_components=15, random_state=42)
+pca.fit(X_train_scaled)
+X_train = pca.transform(X_train_scaled)
+X_test = pca.transform(X_test_scaled)
+all_features_agg = pca.transform(all_features_agg_scaled)
+
 ############################################################
 #### Train model for TSS effluent Error (Random Forest) ####
 ############################################################
