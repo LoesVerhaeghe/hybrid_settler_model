@@ -1,1 +1,1 @@
-# parallel HM
+# hybrid settler model
