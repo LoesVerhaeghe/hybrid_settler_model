@@ -116,7 +116,7 @@ def interpolate_time(df, new_index):
     """Return a new DataFrame with all columns values interpolated to the new_index values."""
     # Convert df.index to datetime and then to numerical values (timestamps)
     df.index = pd.to_datetime(df.index)  # Convert index to datetime
-    df_index_timestamp = df.index.astype(int) / 10**9  # Convert to seconds since epoch
+    df_index_timestamp = df.index.astype(int) / 10**9  # Convert to seconds
     
     # Convert new_index to datetime if it contains date strings
     new_index_datetime = pd.to_datetime(new_index)
